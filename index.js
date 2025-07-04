@@ -66,8 +66,7 @@ const parser = new Parser({
                <a href='${link}' target='_blank'
                 style="margin-top: 8px;
                 display: block;
-                width: 100%;
-                ">
+                width: 100%;">
                  ${
                    imageUrl
                      ? `<div class="image-container" style="position: relative;
@@ -92,11 +91,7 @@ const parser = new Parser({
                         text-align: center;
                         overflow: hidden;
                         border-radius: 10px;">
-                            <p style="display: -webkit-box;
-                                -webkit-line-clamp: 1;     
-                                -webkit-box-orient: vertical;
-                                overflow: hidden;
-                                position: absolute;
+                            <p style="position: absolute;
                                 top: 50%;
                                 left: 50%;
                                 transform: translate(-50%, -50%);
@@ -104,13 +99,10 @@ const parser = new Parser({
                                 color: #333;">${title}</p>
                         </div>`
                  }
-                 <p class="post-title" style="display: -webkit-box;
-                    -webkit-line-clamp: 1;     
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                    margin-top: 6px;
+                 <p class="post-title" style="margin-top: 10px;
                     padding: 0 10px;
-                    ">${title}</p>
+                    text-align: center;
+                    word-wrap: break-word;">${title}</p>
                </a>
              </div>`;
   }
