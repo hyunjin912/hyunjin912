@@ -17,5 +17,8 @@
   "bugs": {
     "url": "https://github.com/hyunjin912/hyunjin912/issues"
   },
-  "homepage": "https://github.com/hyunjin912/hyunjin912#readme"
+  "homepage": "https://github.com/hyunjin912/hyunjin912#readme",
+  "dependencies": {
+    "rss-parser": "^3.13.0"
+  }
 }
