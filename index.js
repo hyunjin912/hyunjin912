@@ -46,63 +46,22 @@ const parser = new Parser({
   // 피드 목록
   const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss"); // 본인의 블로그 주소
 
-  text += `<table width="100%" border="0" cellspacing="0" cellpadding="10">
-`;
+  text += `<ul>`;
 
-  // 최신 6개의 글을 2행 3열 테이블로 표시
-  for (let i = 0; i < 6; i++) {
-    const { title, link, content } = feed.items[i];
-    const imageRegex = /<img[^>]+src="([^">]+)"/g;
-    const match = content.match(imageRegex);
-    const imageUrl = match ? match[0].match(/src="([^">]+)"/)[1] : null;
-
+  // 최신 10개의 글의 제목과 링크를 가져온 후 text에 추가
+  for (let i = 0; i < 10; i++) {
+    const { title, link } = feed.items[i];
     console.log(`${i + 1}번째 게시물`);
     console.log(`추가될 제목: ${title}`);
     console.log(`추가될 링크: ${link}`);
-    console.log(`추가될 이미지: ${imageUrl}`);
-
-    // 3열마다 새로운 행 시작
-    if (i % 3 === 0) {
-      text += `  <tr>
-`;
-    }
-
-    // URL-safe-encoding for the title text in placeholder
-    const placeholderText = encodeURIComponent(title);
-
-    const imageTag = imageUrl
-      ? `<img src="${imageUrl}" alt="${title}"/>`
-      : `<img src="https://placehold.co/600x400?text=No+Image" alt="${title}"/>`;
-
-    text += `    <td align="center" valign="top" width="33.3%">`;
-    text += `       <div style="position: relative; padding-top: 56.25%; overflow: hidden;">`;
-    text += `           <a href='${link}' target='_blank' style="position: absolute; top: 0; bottom:0; left: 0; right:0;">`;
-    text += `               ${imageTag}`;
-    text += `           </a>`;
-    text += `       </div>`;
-    text += `       <p align="center"><a href='${link}' target='_blank'>${title}</a></p>`;
-    text += `    </td>`;
-
-    // 3열마다 행 종료
-    if (i % 3 === 2) {
-      text += `  </tr>
-`;
-    }
+    text += `<li><a href='${link}' target='_blank'>${title}</a></li>`;
   }
 
-  // 만약 게시물 수가 3의 배수가 아닐 경우 테이블을 닫아줌 (현재는 6개 고정이라 불필요)
-  if (6 % 3 !== 0) {
-    text += `</tr>
-`;
-  }
-
-  text += `</table>`;
+  text += `</ul>`;
 
   // README.md 파일 생성
-  // 터미널에서 node index.js 실행 후 vscode로 README.md 파일 미리보기 하면 됨
   writeFileSync("README.md", text, "utf8", (e) => {
     console.log(e);
   });
-
   console.log("업데이트 완료");
 })();
