@@ -71,21 +71,17 @@ const parser = new Parser({
     const placeholderText = encodeURIComponent(title);
 
     const imageTag = imageUrl
-      ? `<img src="${imageUrl}" alt="${title}" style="object-fit: cover;"/>`
-      : `<img src="https://placehold.co/600x400?text=No+Image" alt="${title}" style="object-fit: cover;"/>`;
+      ? `<img src="${imageUrl}" alt="${title}"/>`
+      : `<img src="https://placehold.co/600x400?text=No+Image" alt="${title}"/>`;
 
-    text += `    <td align="center" valign="top" width="33.3%">
-`;
-    text += `      <a href='${link}' target='_blank' style="display: block; overflow: hidden;">
-`;
-    text += `        ${imageTag}
-`;
-    text += `      </a>
-`;
-    text += `      <p align="center"><a href='${link}' target='_blank'>${title}</a></p>
-`;
-    text += `    </td>
-`;
+    text += `    <td align="center" valign="top" width="33.3%">`;
+    text += `       <div style="position: relative; padding-top: 56.25%; overflow: hidden;">`;
+    text += `           <a href='${link}' target='_blank' style="position: absolute; top: 0; bottom:0; left: 0; right:0;">`;
+    text += `               ${imageTag}`;
+    text += `           </a>`;
+    text += `       </div>`;
+    text += `       <p align="center"><a href='${link}' target='_blank'>${title}</a></p>`;
+    text += `    </td>`;
 
     // 3열마다 행 종료
     if (i % 3 === 2) {
