@@ -46,11 +46,10 @@ const parser = new Parser({
   // 피드 목록
   const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss"); // 본인의 블로그 주소
 
-  text += `<div class="grid-container" style="display: grid;
-        grid-template-columns: repeat(3, 1fr);
-        gap: 16px;">`;
+  text += `<table width="100%" border="0" cellspacing="0" cellpadding="10">
+`;
 
-  // 최신 6개의 글의 제목, 링크, 이미지(포스터)를 가져온 후 text에 추가
+  // 최신 6개의 글을 2행 3열 테이블로 표시
   for (let i = 0; i < 6; i++) {
     const { title, link, content } = feed.items[i];
     const imageRegex = /<img[^>]+src="([^">]+)"/g;
@@ -62,52 +61,46 @@ const parser = new Parser({
     console.log(`추가될 링크: ${link}`);
     console.log(`추가될 이미지: ${imageUrl}`);
 
-    text += `<div class="grid-item" style="display: block;">
-               <a href='${link}' target='_blank'
-                style="margin-top: 8px;
-                display: block;
-                width: 100%;">
-                 ${
-                   imageUrl
-                     ? `<div class="image-container" style="position: relative;
-                        width: 100%;
-                        padding-bottom: 56.25%;
-                        overflow: hidden;
-                        border-radius:10px;">
-                            <img src="${imageUrl}" alt="${title}" style="position: absolute;
-                                top: 0;
-                                left: 0;
-                                width: 100%;
-                                height: 100%;
-                                object-fit: cover;"/>
-                        </div>`
-                     : `<div class="no-image-container" style="position: relative;
-                        width: 100%;
-                        padding-bottom: 56.25%; 
-                        background-color: #f0f0f0; 
-                        display: flex;
-                        align-items: center;
-                        justify-content: center;
-                        text-align: center;
-                        overflow: hidden;
-                        border-radius: 10px;">
-                            <p style="position: absolute;
-                                top: 50%;
-                                left: 50%;
-                                transform: translate(-50%, -50%);
-                                width: 90%;
-                                color: #333;">${title}</p>
-                        </div>`
-                 }
-                 <p class="post-title" style="margin-top: 10px;
-                    padding: 0 10px;
-                    text-align: center;
-                    word-wrap: break-word;">${title}</p>
-               </a>
-             </div>`;
+    // 3열마다 새로운 행 시작
+    if (i % 3 === 0) {
+      text += `  <tr>
+`;
+    }
+
+    // URL-safe-encoding for the title text in placeholder
+    const placeholderText = encodeURIComponent(title);
+
+    const imageTag = imageUrl
+      ? `<img src="${imageUrl}" alt="${title}" style="object-fit: cover;"/>`
+      : `<img src="https://placehold.co/600x400?text=No+Image" alt="${title}" style="object-fit: cover;"/>`;
+
+    text += `    <td align="center" valign="top" width="33.3%">
+`;
+    text += `      <a href='${link}' target='_blank' style="display: block; overflow: hidden;">
+`;
+    text += `        ${imageTag}
+`;
+    text += `      </a>
+`;
+    text += `      <p align="center"><a href='${link}' target='_blank'>${title}</a></p>
+`;
+    text += `    </td>
+`;
+
+    // 3열마다 행 종료
+    if (i % 3 === 2) {
+      text += `  </tr>
+`;
+    }
   }
 
-  text += `</div>`;
+  // 만약 게시물 수가 3의 배수가 아닐 경우 테이블을 닫아줌 (현재는 6개 고정이라 불필요)
+  if (6 % 3 !== 0) {
+    text += `</tr>
+`;
+  }
+
+  text += `</table>`;
 
   // README.md 파일 생성
   // 터미널에서 node index.js 실행 후 vscode로 README.md 파일 미리보기 하면 됨
