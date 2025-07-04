@@ -23,7 +23,7 @@ let text = `
 
 <br>
 
-## 💻 Languages
+## 💻 Things used for development
 <p>
 <img alt="" src= "https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
   <img alt="" src= "https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
