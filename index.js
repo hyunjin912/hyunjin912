@@ -1,4 +1,24 @@
+import { writeFileSync } from "node:fs";
+import Parser from "rss-parser";
 
+/**
+ * README.MD에 작성될 페이지 텍스트
+ * @type {string}
+ *
+ * 아래 사이트에서 로고 검색 한 후,
+ * https://simpleicons.org/?q=flutter
+ *
+ * 아래 사이트처럼 뱃지 만들기
+ * https://shields.io/
+ *
+ * 예시)
+ * https://img.shields.io/badge/Flutter-black?logo=Flutter&logoColor=02569B"/>
+ *
+ * 설명)
+ * /Flutter-black?logo=Flutter&logoColor=02569B
+ * /메세지(내용)-색상?logo=로고이름&logoColor=로고색상
+ */
+let text = `
 # 반갑습니다 신입 플러터 개발자 이현진입니다👋
 
 ## 💻 Languages
@@ -8,7 +28,20 @@
 </p>
 
 ## 📕 Latest Blog Posts
+`;
 
+// rss-parser 생성
+const parser = new Parser({
+  headers: {
+    Accept: "application/rss+xml, application/xml, text/xml; q=0.1",
+  },
+});
+
+(async () => {
+  // 피드 목록
+  const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss"); // 본인의 블로그 주소
+
+  const style = `
     <style>
       @import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
       /* http://meyerweb.com/eric/tools/css/reset/ 
@@ -128,46 +161,53 @@
         }
       }
     </style>
-  <div class="grid-container"><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-041-Riverpod-Unhandled-Exception-Bad-state-Future-already-completed-%ED%95%B4%EA%B2%B0%ED%95%98%EA%B8%B0' target='_blank'>
-                 <div class="no-image-container">
-                     <p>[TIL-041] Riverpod - Unhandled Exception: Bad state: Future already completed 해결하기</p>
-                   </div>
-                 <p class="post-title">[TIL-041] Riverpod - Unhandled Exception: Bad state: Future already completed 해결하기</a>
+  `;
+
+  text += style;
+  text += `<div class="grid-container">`;
+
+  // 최신 6개의 글의 제목, 링크, 이미지(포스터)를 가져온 후 text에 추가
+  for (let i = 0; i < 6; i++) {
+    const { title, link, content } = feed.items[i];
+    const imageRegex = /<img[^>]+src="([^">]+)"/g;
+    const match = content.match(imageRegex);
+    const imageUrl = match ? match[0].match(/src="([^">]+)"/)[1] : null;
+
+    console.log(`${i + 1}번째 게시물`);
+    console.log(`추가될 제목: ${title}`);
+    console.log(`추가될 링크: ${link}`);
+    console.log(`추가될 이미지: ${imageUrl}`);
+
+    text += `<div class="grid-item">
+               <a href='${link}' target='_blank'>
+                 ${
+                   imageUrl
+                     ? `<div class="image-container">
+                     <img src="${imageUrl}" alt="${title}"/>
+                   </div>`
+                     : `<div class="no-image-container">
+                     <p>${title}</p>
+                   </div>`
+                 }
+                 <p class="post-title">${title}</a>
                </a>
-             </div><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-040-Flutter-Rebuild%EC%99%80-GlobalKey' target='_blank'>
-                 <div class="image-container">
-                     <img src="https://blog.kakaocdn.net/dn/rnmdu/btsOZzfq4HW/JTjicK0YXDlInneR1t8fZ1/img.gif" alt="[TIL-040] Flutter Rebuild와 GlobalKey"/>
-                   </div>
-                 <p class="post-title">[TIL-040] Flutter Rebuild와 GlobalKey</a>
-               </a>
-             </div><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-039-%EB%94%94%EC%9E%90%EC%9D%B4%EB%84%88%EC%99%80-%ED%98%91%EC%97%85%ED%95%98%EA%B8%B0-%ED%94%8C%EB%9F%AC%ED%84%B0-flex%EC%86%8D%EC%84%B1' target='_blank'>
-                 <div class="image-container">
-                     <img src="https://blog.kakaocdn.net/dn/BwRl8/btsOv5sIUDm/yZVbypUvUm6zu9lI52y121/img.png" alt="[TIL-039] 디자이너와 협업하기 - 플러터 flex속성"/>
-                   </div>
-                 <p class="post-title">[TIL-039] 디자이너와 협업하기 - 플러터 flex속성</a>
-               </a>
-             </div><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-038-%EB%94%94%EC%9E%90%EC%9D%B4%EB%84%88%EC%99%80-%ED%98%91%EC%97%85%ED%95%98%EA%B8%B0-%ED%94%BC%EA%B7%B8%EB%A7%88-lineHeight' target='_blank'>
-                 <div class="image-container">
-                     <img src="https://blog.kakaocdn.net/dn/bwsLnY/btsOrttfX1Y/HqcA5FsWGLg3mNcuM6sn0k/img.png" alt="[TIL-038] 디자이너와 협업하기 - 피그마 lineHeight"/>
-                   </div>
-                 <p class="post-title">[TIL-038] 디자이너와 협업하기 - 피그마 lineHeight</a>
-               </a>
-             </div><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-037-Dart-%ED%81%B4%EB%9E%98%EC%8A%A4%EC%9D%98-%EB%A9%A4%EB%B2%84%EB%B3%80%EC%88%98%EC%99%80-%EC%83%9D%EC%84%B1%EC%9E%90-%EC%9D%98%EB%AF%B8-%ED%8C%8C%EC%95%85%ED%95%98%EA%B8%B0' target='_blank'>
-                 <div class="no-image-container">
-                     <p>[TIL-037] Dart 클래스의 멤버변수와 생성자 의미 파악하기</p>
-                   </div>
-                 <p class="post-title">[TIL-037] Dart 클래스의 멤버변수와 생성자 의미 파악하기</a>
-               </a>
-             </div><div class="grid-item">
-               <a href='https://skyhyunjinlee.tistory.com/entry/TIL-036-%EB%8F%99%EC%A0%81%EC%9C%BC%EB%A1%9C-%EB%86%92%EC%9D%B4-%EA%B0%80%EC%A0%B8%EC%98%A4%EA%B8%B0' target='_blank'>
-                 <div class="no-image-container">
-                     <p>[TIL-036] 동적으로 높이 가져오기</p>
-                   </div>
-                 <p class="post-title">[TIL-036] 동적으로 높이 가져오기</a>
-               </a>
-             </div></div>
+             </div>`;
+  }
+
+  text += `</div>`;
+
+  // README.md 파일 생성
+  writeFileSync("README.md", text, "utf8", (e) => {
+    console.log(e);
+  });
+
+  // preview.html 파일 생성
+  // 터미널에서 node index.js 실행 후
+  // 브라우저로 preview.html 열면 됨
+  const previewText = `<html><head><meta charset="UTF-8"></head><body>${text}</body></html>`;
+  writeFileSync("preview.html", previewText, "utf8", (e) => {
+    console.log(e);
+  });
+
+  console.log("업데이트 완료");
+})();
