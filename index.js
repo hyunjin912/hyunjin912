@@ -1,24 +1,33 @@
-import { writeFileSync } from "node:fs";
+import fs from "fs";
+import path from "path";
 import Parser from "rss-parser";
+import fetch from "node-fetch";
+import sharp from "sharp";
 
-/**
- * README.MD에 작성될 페이지 텍스트
- * @type {string}
- *
- * 아래 사이트에서 로고 검색 한 후,
- * https://simpleicons.org/?q=flutter
- *
- * 아래 사이트처럼 뱃지 만들기
- * https://shields.io/
- *
- * 예시)
- * https://img.shields.io/badge/Flutter-black?logo=Flutter&logoColor=02569B"/>
- *
- * 설명)
- * /Flutter-black?logo=Flutter&logoColor=02569B
- * /메세지(내용)-색상?logo=로고이름&logoColor=로고색상
- */
-let text = `
+// assets 폴더 경로
+const assetsDir = path.join(process.cwd(), "assets");
+if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir);
+
+// 파일명 안전하게 변환
+function safeFilename(str) {
+  return str.replace(/[\/\\?%*:|"<>]/g, "_").replace(/\s+/g, "_");
+}
+
+// assets 폴더 내 파일 목록
+function getAssetFiles() {
+  return fs.readdirSync(assetsDir).filter((f) => /\.(jpg|jpeg|png)$/i.test(f));
+}
+
+// RSS 파서 생성
+const parser = new Parser({
+  headers: {
+    Accept: "application/rss+xml, application/xml, text/xml; q=0.1",
+  },
+});
+
+(async () => {
+  // README 텍스트 시작
+  let text = `
 # 반갑습니다 신입 플러터 개발자 이현진입니다👋
 
 ### 자신의 노력과 경험이 사용자에게 더 나은 서비스를 제공한다고 믿는 모바일(플러터) 개발자입니다. 
@@ -31,46 +40,86 @@ let text = `
 ## 📕 Latest Blog Posts
 `;
 
-// rss-parser 생성
-const parser = new Parser({
-  headers: {
-    Accept: "application/rss+xml, application/xml, text/xml; q=0.1",
-  },
-});
+  const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss");
+  const usedFiles = [];
+  let markdownTable = `\n|  |  |  |  |\n|---|---|---|---|\n`;
 
-(async () => {
-  // 피드 목록
-  const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss"); // 본인의 블로그 주소
+  // 4열 3행(최대 12개) 테이블 생성
+  let count = 0;
+  for (let row = 0; row < 3; row++) {
+    markdownTable += "|";
+    for (let col = 0; col < 4; col++) {
+      if (count < feed.items.length) {
+        const item = feed.items[count];
+        const title = item.title;
+        const link = item.link;
+        const content = item.content || "";
+        const filename = safeFilename(title) + ".jpg";
+        const filePath = path.join(assetsDir, filename);
 
-  text += `<ul>`;
-
-  // 최신 10개의 글의 제목과 링크를 가져온 후 text에 추가
-  for (let i = 0; i < 10; i++) {
-    const { title, link } = feed.items[i];
-    console.log(`${i + 1}번째 게시물`);
-    console.log(`추가될 제목: ${title}`);
-    console.log(`추가될 링크: ${link}`);
-    text += `<li><a href='${link}' target='_blank'>${title}</a></li>`;
+        let imgSrc = "";
+        // assets 폴더에 파일이 이미 있으면 재사용
+        if (fs.existsSync(filePath)) {
+          imgSrc = `assets/${filename}`;
+        } else {
+          // 썸네일 추출
+          const match = content.match(/<img.*?src="(.*?)"/);
+          if (match) {
+            const imageUrl = match[1];
+            try {
+              const response = await fetch(imageUrl);
+              if (!response.ok) throw new Error("이미지 다운로드 실패");
+              const buffer = Buffer.from(await response.arrayBuffer());
+              // gif면 jpg로 변환
+              const processedBuffer = await sharp(buffer)
+                .resize(300, 168, { fit: "cover" })
+                .toFormat("jpeg")
+                .toBuffer();
+              fs.writeFileSync(filePath, processedBuffer);
+              imgSrc = `assets/${filename}`;
+            } catch (e) {
+              imgSrc = "assets/no-image.jpg";
+            }
+          } else {
+            imgSrc = "assets/no-image.jpg";
+          }
+        }
+        usedFiles.push(path.basename(imgSrc));
+        markdownTable += ` ![](${imgSrc})<br/>[${title}](${link}) |`;
+        count++;
+      } else {
+        markdownTable += " |";
+      }
+    }
+    markdownTable += "\n";
   }
 
-  text += `</ul>`;
+  // assets 폴더 내 미사용 이미지 삭제
+  const assetFiles = getAssetFiles();
+  for (const file of assetFiles) {
+    if (!usedFiles.includes(file) && file !== "no-image.png") {
+      fs.unlinkSync(path.join(assetsDir, file));
+    }
+  }
 
+  // 테이블 삽입
+  text += markdownTable;
+
+  // 개발환경 섹션 추가
   text += `
-  <br>
+<br>
 
-  ## 💻 Things used for development
-  <p>
-    <img alt="" src= "https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
-    <img alt="" src= "https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
-    <img alt="" src= "https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
-    <img alt="" src= "https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
-    <img alt="" src= "https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
-  </p>
-  `;
+## 💻 Things used for development
+<p>
+  <img alt="" src="https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
+  <img alt="" src="https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
+  <img alt="" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
+  <img alt="" src="https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
+  <img alt="" src="https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
+</p>
+`;
 
   // README.md 파일 생성
-  writeFileSync("README.md", text, "utf8", (e) => {
-    console.log(e);
-  });
-  console.log("업데이트 완료");
+  fs.writeFileSync("README.md", text, "utf8");
+  console.log("README.md 생성 완료");
 })();
