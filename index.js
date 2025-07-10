@@ -99,7 +99,7 @@ const parser = new Parser({
         }
         usedFiles.push(path.basename(imgSrc));
         htmlTable += `<img src="${imgSrc}" style="display:block;margin:0 auto;vertical-align:top;" /><br/>`;
-        htmlTable += `<a href="${link}" target="_blank">${title}</a>`;
+        htmlTable += `<a href="${link}" target="_blank">${formattedTitle}</a>`;
       }
       htmlTable += "</td>\n";
       count++;
