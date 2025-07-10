@@ -8,6 +8,8 @@
 <img alt="" src= "https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
   <img alt="" src= "https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
   <img alt="" src= "https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
+  <img alt="" src= "https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
+  <img alt="" src= "https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
 </p>
 
 <br>
