@@ -21,16 +21,10 @@ import Parser from "rss-parser";
 let text = `
 # 반갑습니다 신입 플러터 개발자 이현진입니다👋
 
-<br>
-
-## 💻 Things used for development
-<p>
-<img alt="" src= "https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
-  <img alt="" src= "https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
-  <img alt="" src= "https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
-  <img alt="" src= "https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
-  <img alt="" src= "https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
-</p>
+### 자신의 노력과 경험이 사용자에게 더 나은 서비스를 제공한다고 믿는 모바일(플러터) 개발자입니다. 
+깃허브와 블로그는 저만의 개발 과정과 배움을 기록하는 공간입니다.     
+이렇게 축적된 경험과 생각들은 단순한 기록을 넘어,       
+저만의 문제 해결 방식과 개발에 대한 고민이 서비스 곳곳에 자연스럽게 스며들게 하여, 사용자에게 더욱 신뢰받는 경험과 가치를 전할 수 있다고 믿습니다.
 
 <br>
 
@@ -60,6 +54,19 @@ const parser = new Parser({
   }
 
   text += `</ul>`;
+
+  text += `
+  <br>
+
+  ## 💻 Things used for development
+  <p>
+    <img alt="" src= "https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
+    <img alt="" src= "https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
+    <img alt="" src= "https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
+    <img alt="" src= "https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
+    <img alt="" src= "https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
+  </p>
+  `;
 
   // README.md 파일 생성
   writeFileSync("README.md", text, "utf8", (e) => {
