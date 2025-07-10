@@ -8,9 +8,10 @@ import sharp from "sharp";
 const assetsDir = path.join(process.cwd(), "assets");
 if (!fs.existsSync(assetsDir)) fs.mkdirSync(assetsDir);
 
-// 파일명 안전하게 변환
-function safeFilename(str) {
-  return str.replace(/[\/\\?%*:|"<>]/g, "_").replace(/\s+/g, "_");
+// guid에서 맨 뒤 숫자 추출 함수
+function extractGuidNumber(guid) {
+  const match = guid.match(/(\d+)(\/)?$/);
+  return match ? match[1] : guid;
 }
 
 // 타이틀 36글자 고정: 33자 이상이면 ... 붙이고, 33자 미만이면 공백 추가
@@ -48,6 +49,17 @@ const parser = new Parser({
 
 <br>
 
+## 💻 Things used for development
+<p>
+  <img alt="" src="https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
+  <img alt="" src="https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
+  <img alt="" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
+  <img alt="" src="https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
+  <img alt="" src="https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
+</p>
+
+<br>
+
 ## 📕 Latest Blog Posts
 `;
 
@@ -67,7 +79,8 @@ const parser = new Parser({
         const formattedTitle = formatTitle(title);
         const link = item.link;
         const content = item.content || "";
-        const filename = safeFilename(title) + ".jpg";
+        const guidNum = extractGuidNumber(item.guid);
+        const filename = `${guidNum}.jpg`;
         const filePath = path.join(assetsDir, filename);
 
         let imgSrc = "";
@@ -88,6 +101,8 @@ const parser = new Parser({
                 .resize(300, 168, { fit: "cover" })
                 .toFormat("jpeg")
                 .toBuffer();
+
+              // 파일 생성
               fs.writeFileSync(filePath, processedBuffer);
               imgSrc = `assets/${filename}`;
             } catch (e) {
@@ -99,7 +114,7 @@ const parser = new Parser({
         }
         usedFiles.push(path.basename(imgSrc));
         htmlTable += `<img src="${imgSrc}" style="display:block;margin:0 auto;vertical-align:top;" /><br/>`;
-        htmlTable += `<a href="${link}" target="_blank">${formattedTitle}</a>`;
+        htmlTable += `<a href="${link}" target="_blank">${title}</a>`;
       }
       htmlTable += "</td>\n";
       count++;
@@ -108,7 +123,8 @@ const parser = new Parser({
   }
   htmlTable += "</table>\n";
 
-  // assets 폴더 내 미사용 이미지 삭제
+  // assets 폴더 내 미사용 이미지 삭제 (no-image.jpg는 항상 남김)
+  // no-image.jpg가 없으면 생성하지 않지만, 있으면 절대 삭제하지 않음
   const assetFiles = getAssetFiles();
   for (const file of assetFiles) {
     if (!usedFiles.includes(file) && file !== "no-image.jpg") {
@@ -118,20 +134,6 @@ const parser = new Parser({
 
   // 테이블 삽입
   text += htmlTable;
-
-  // 개발환경 섹션 추가
-  text += `
-<br>
-
-## 💻 Things used for development
-<p>
-  <img alt="" src="https://img.shields.io/badge/Dart-0175C2?logo=Dart&logoColor=white"/>
-  <img alt="" src="https://img.shields.io/badge/Flutter-02569B?logo=Flutter&logoColor=white"/>
-  <img alt="" src="https://img.shields.io/badge/JavaScript-F7DF1E?logo=JavaScript&logoColor=white"/> 
-  <img alt="" src="https://img.shields.io/badge/Git-F05032?logo=Git&logoColor=white"/> 
-  <img alt="" src="https://img.shields.io/badge/Figma-F24E1E?logo=Figma&logoColor=white"/> 
-</p>
-`;
 
   // README.md 파일 생성
   fs.writeFileSync("README.md", text, "utf8");
