@@ -13,6 +13,17 @@ function safeFilename(str) {
   return str.replace(/[\/\\?%*:|"<>]/g, "_").replace(/\s+/g, "_");
 }
 
+// 타이틀 36글자 고정: 33자 이상이면 ... 붙이고, 33자 미만이면 공백 추가
+function formatTitle(title) {
+  const maxLen = 33;
+  const totalLen = 36;
+  if (title.length > maxLen) {
+    return title.slice(0, maxLen) + "...";
+  } else {
+    return title.padEnd(totalLen, " ");
+  }
+}
+
 // assets 폴더 내 파일 목록
 function getAssetFiles() {
   return fs.readdirSync(assetsDir).filter((f) => /\.(jpg|jpeg|png)$/i.test(f));
@@ -42,16 +53,18 @@ const parser = new Parser({
 
   const feed = await parser.parseURL("https://skyhyunjinlee.tistory.com/rss");
   const usedFiles = [];
-  let markdownTable = `\n|  |  |  |  |\n|---|---|---|---|\n`;
+  let htmlTable = `<table>\n`;
 
-  // 4열 3행(최대 12개) 테이블 생성
+  // 4열 3행(최대 12개) HTML 테이블 생성
   let count = 0;
   for (let row = 0; row < 3; row++) {
-    markdownTable += "|";
+    htmlTable += "  <tr>\n";
     for (let col = 0; col < 4; col++) {
+      htmlTable += '    <td width="25%" align="center" valign="top">';
       if (count < feed.items.length) {
         const item = feed.items[count];
         const title = item.title;
+        const formattedTitle = formatTitle(title);
         const link = item.link;
         const content = item.content || "";
         const filename = safeFilename(title) + ".jpg";
@@ -85,25 +98,26 @@ const parser = new Parser({
           }
         }
         usedFiles.push(path.basename(imgSrc));
-        markdownTable += ` ![](${imgSrc})<br/>[${title}](${link}) |`;
-        count++;
-      } else {
-        markdownTable += " |";
+        htmlTable += `<img src="${imgSrc}" style="display:block;margin:0 auto;vertical-align:top;" /><br/>`;
+        htmlTable += `<a href="${link}" target="_blank">${title}</a>`;
       }
+      htmlTable += "</td>\n";
+      count++;
     }
-    markdownTable += "\n";
+    htmlTable += "  </tr>\n";
   }
+  htmlTable += "</table>\n";
 
   // assets 폴더 내 미사용 이미지 삭제
   const assetFiles = getAssetFiles();
   for (const file of assetFiles) {
-    if (!usedFiles.includes(file) && file !== "no-image.png") {
+    if (!usedFiles.includes(file) && file !== "no-image.jpg") {
       fs.unlinkSync(path.join(assetsDir, file));
     }
   }
 
   // 테이블 삽입
-  text += markdownTable;
+  text += htmlTable;
 
   // 개발환경 섹션 추가
   text += `
